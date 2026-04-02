@@ -4,32 +4,33 @@ from firewall import Firewall
 
 class PacketSniff(QObject):
 
-    send_packet = pyqtSignal(dict)
+    #packet_signal = pyqtSignal(dict)
 
     def __init__(self, firewall):
         self.firewall = firewall
 
     def start(self):
-        # run QObject initialization
         super().__init__()
-
-        # start packet sniffing
         sniff(prn=self.process_packet)
 
     def process_packet(self, pkt):
         
         # get values from packet
         data = get_packet_values(pkt)
-        
+
+        # ignore packet if data is empty
+        if not(data):
+            return
+
+        # apply rules from firewall.py
+        data["action"] = firewall.check_rules(data)
+
         # TESTING print data
         print(data)
         print()
 
-        # apply rules from firewall.py
-        data["action"] = check_rules(firewall, data)
-
         # send values + action to gui
-        send_packet.emit(data)
+        #packet_signal.emit(data)
 
 
 
@@ -48,6 +49,8 @@ def get_packet_values(pkt):
     if pkt.haslayer(IP):
         data["src_ip"] = pkt[IP].src
         data["dst_ip"] = pkt[IP].dst
+    else:
+        return []
     
     if pkt.haslayer(TCP):
         data["src_port"] = pkt[TCP].sport 
@@ -65,6 +68,7 @@ def get_packet_values(pkt):
 # Test
 
 if __name__ == "__main__":
-    sniffer = PacketSniff()
+    firewall = Firewall()
+    sniffer = PacketSniff(firewall)
     sniffer.start()
 

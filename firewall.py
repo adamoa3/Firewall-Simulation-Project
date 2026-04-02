@@ -24,7 +24,7 @@ class Firewall:
     # if there is a match, returns data["action"], otherwise returns the default policy
     def check_rules(self, data):
 
-        for rule in rules:
+        for rule in self.rules:
             if(rule_match(rule, data)):
                 return rule["action"]
 
