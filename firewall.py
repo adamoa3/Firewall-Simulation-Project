@@ -2,10 +2,15 @@ from PyQt6.QtCore import QObject, pyqtSignal
 
 """
     Rule format: dict with the same keys as defined in packet_sniff.py data
+    Categories left empty will not be checked
         Ex: 
         rule {
-            "src_port":80,
-            "action":"ALLOW"
+            "src_ip": None,
+            "dst_ip": None,
+            "protocol": None
+            "src_port": 80,
+            "dst_port": None,
+            "action": "ALLOW"
         }
 """
 
@@ -31,7 +36,7 @@ class Firewall:
 def rule_match(rule, data):
     for key in rule:
             
-        # skip over action
+        # skip over action or empty
         if key == "action" or rule[key] == None:
             continue
 
