@@ -65,10 +65,17 @@ def get_packet_values(pkt):
     return data
 
 
-# Test
+# TESTING
 
 if __name__ == "__main__":
     firewall = Firewall()
+    firewall.add_rule({
+            "src_ip": None,
+            "dst_ip": None,
+            "protocol": None,
+            "src_port": 443,
+            "dst_port": None,
+            "action": "BLOCK"})
     sniffer = PacketSniff(firewall)
     sniffer.start()
 

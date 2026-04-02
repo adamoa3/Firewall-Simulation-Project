@@ -30,6 +30,10 @@ class Firewall:
 
         return self.default_policy
 
+    def add_rule(self, rule):
+        self.rules.append(rule)
+
+
     
 # takes a single rule and matches it against a packet's data
 # returns true if all is a match, false otherwise
