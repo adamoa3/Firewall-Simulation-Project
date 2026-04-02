@@ -2,7 +2,7 @@ from PyQt6.QtCore import QObject, pyqtSignal
 from scapy.all import sniff, IP, TCP, UDP
 from firewall import Firewall
 
-class PacketSniff(QObject):
+class PacketSniffer(QObject):
 
     #packet_signal = pyqtSignal(dict)
 
@@ -76,6 +76,6 @@ if __name__ == "__main__":
             "src_port": 443,
             "dst_port": None,
             "action": "BLOCK"})
-    sniffer = PacketSniff(firewall)
+    sniffer = PacketSniffer(firewall)
     sniffer.start()
 
