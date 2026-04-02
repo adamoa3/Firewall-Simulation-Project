@@ -1,23 +1,36 @@
 from PyQt6.QtCore import QObject, pyqtSignal
 from scapy.all import sniff, IP, TCP, UDP
+from firewall import Firewall
 
 class PacketSniff(QObject):
+
     send_packet = pyqtSignal(dict)
 
+    def __init__(self, firewall):
+        self.firewall = firewall
+
     def start(self):
+        # run QObject initialization
+        super().__init__()
+
+        # start packet sniffing
         sniff(prn=self.process_packet)
 
-    # Processes packets, passed into sniff function
     def process_packet(self, pkt):
         
         # get values from packet
         data = get_packet_values(pkt)
+        
+        # TESTING print data
         print(data)
         print()
 
         # apply rules from firewall.py
+        data["action"] = check_rules(firewall, data)
 
         # send values + action to gui
+        send_packet.emit(data)
+
 
 
 # gets packet values from a scapy packet
@@ -35,19 +48,16 @@ def get_packet_values(pkt):
     if pkt.haslayer(IP):
         data["src_ip"] = pkt[IP].src
         data["dst_ip"] = pkt[IP].dst
-        #print(f"Source IP: {src_IP}\nDestination IP: {dst_IP}")
     
     if pkt.haslayer(TCP):
         data["src_port"] = pkt[TCP].sport 
         data["dst_port"] = pkt[TCP].dport 
         data["protocol"] = "TCP"
-        #print(f"Source Port: {src_port}\nDestination Port: {dst_port}")
 
     if pkt.haslayer(UDP):
         data["src_port"] = pkt[UDP].sport 
         data["dst_port"] = pkt[UDP].dport
         data["protocol"] = "UDP" 
-        #print(f"Source Port: {src_port}\nDestination Port: {dst_port}")
 
     return data
 
