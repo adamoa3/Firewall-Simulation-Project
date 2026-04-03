@@ -4,7 +4,7 @@ from firewall import Firewall
 
 class PacketSniffer(QObject):
 
-    #packet_signal = pyqtSignal(dict)
+    packet_signal = pyqtSignal(dict)
 
     def __init__(self, firewall):
         super().__init__()
@@ -23,14 +23,10 @@ class PacketSniffer(QObject):
             return
 
         # apply rules from firewall.py
-        data["action"] = firewall.check_rules(data)
-
-        # TESTING print data
-        print(data)
-        print()
+        data["action"] = self.firewall.check_rules(data)
 
         # send values + action to gui
-        #packet_signal.emit(data)
+        self.packet_signal.emit(data)
 
 
 
