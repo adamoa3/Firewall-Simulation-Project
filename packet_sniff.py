@@ -7,10 +7,10 @@ class PacketSniffer(QObject):
     #packet_signal = pyqtSignal(dict)
 
     def __init__(self, firewall):
+        super().__init__()
         self.firewall = firewall
 
     def start(self):
-        super().__init__()
         sniff(prn=self.process_packet)
 
     def process_packet(self, pkt):
