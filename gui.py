@@ -38,8 +38,13 @@ class MainWindow(QMainWindow):
         self.start_button.setFixedSize(80, 40)
         self.packet_sniffer.packet_signal.connect(self.handle_data)
         self.start_button.clicked.connect(self.packet_sniffer.start)
-
         grid.addWidget(self.start_button, 0, 0, Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignHCenter)
+
+        # stop button
+        self.stop_button = QPushButton("Stop")
+        self.stop_button.setFixedSize(80, 40)
+        self.stop_button.clicked.connect(self.packet_sniffer.stop)
+        grid.addWidget(self.stop_button, 0, 1, Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignHCenter)
 
 
     # takes in packet values and displays in GUI
