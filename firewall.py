@@ -1,5 +1,3 @@
-from PyQt6.QtCore import QObject, pyqtSignal
-
 """
     Rule format: dict with the same keys as defined in packet_sniff.py data
     Categories left empty will not be checked
@@ -7,7 +5,7 @@ from PyQt6.QtCore import QObject, pyqtSignal
         rule {
             "src_ip": None,
             "dst_ip": None,
-            "protocol": None
+            "protocol": None,
             "src_port": 80,
             "dst_port": None,
             "action": "ALLOW"

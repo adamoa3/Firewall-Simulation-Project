@@ -1,17 +1,26 @@
 from PyQt6.QtCore import QObject, pyqtSignal
-from scapy.all import sniff, IP, TCP, UDP
+from scapy.all import AsyncSniffer, sniff, IP, TCP, UDP
 from firewall import Firewall
 
-class PacketSniff(QObject):
+class PacketSniffer(QObject):
 
-    #packet_signal = pyqtSignal(dict)
+    packet_signal = pyqtSignal(dict)
 
     def __init__(self, firewall):
+        super().__init__()
+        self.sniffer = None
+        self.running = False
         self.firewall = firewall
 
     def start(self):
-        super().__init__()
-        sniff(prn=self.process_packet)
+        sniffer = AsyncSniffer(prn=self.process_packet)
+        self.running = True
+        sniffer.start()
+
+    def stop(self):
+        if self.running:
+            self.sniffer.stop()
+            self.running = False
 
     def process_packet(self, pkt):
         
@@ -23,14 +32,10 @@ class PacketSniff(QObject):
             return
 
         # apply rules from firewall.py
-        data["action"] = firewall.check_rules(data)
-
-        # TESTING print data
-        print(data)
-        print()
+        data["action"] = self.firewall.check_rules(data)
 
         # send values + action to gui
-        #packet_signal.emit(data)
+        self.packet_signal.emit(data)
 
 
 
@@ -76,6 +81,6 @@ if __name__ == "__main__":
             "src_port": 443,
             "dst_port": None,
             "action": "BLOCK"})
-    sniffer = PacketSniff(firewall)
+    sniffer = PacketSniffer(firewall)
     sniffer.start()
 
