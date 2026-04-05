@@ -10,7 +10,8 @@ from PyQt6.QtWidgets import (
     QMainWindow, 
     QGridLayout,
     QLabel,
-    QPushButton
+    QPushButton,
+    QTableWidget
 )
 
 class MainWindow(QMainWindow):
@@ -35,19 +36,11 @@ class MainWindow(QMainWindow):
         # start button
         self.start_button = QPushButton("Start")
         self.start_button.setFixedSize(80, 40)
-        self.start_button.clicked.connect(self.start_sniffer)
+        self.packet_sniffer.packet_signal.connect(self.handle_data)
+        self.start_button.clicked.connect(self.packet_sniffer.start)
+
         grid.addWidget(self.start_button, 0, 0, Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignHCenter)
 
-    def start_sniffer(self):
-        # set up packet thread
-        self.thread = QThread()
-        self.packet_sniffer.moveToThread(self.thread)
-
-        # connect thread to start function in packet_sniff.py
-        self.thread.started.connect(self.packet_sniffer.start)
-        self.packet_sniffer.packet_signal.connect(self.handle_data)
-
-        self.thread.start()
 
     # takes in packet values and displays in GUI
     def handle_data(self, data):

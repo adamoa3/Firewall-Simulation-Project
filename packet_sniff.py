@@ -1,5 +1,5 @@
 from PyQt6.QtCore import QObject, pyqtSignal
-from scapy.all import sniff, IP, TCP, UDP
+from scapy.all import AsyncSniffer, sniff, IP, TCP, UDP
 from firewall import Firewall
 
 class PacketSniffer(QObject):
@@ -8,10 +8,19 @@ class PacketSniffer(QObject):
 
     def __init__(self, firewall):
         super().__init__()
+        self.sniffer = None
+        self.running = False
         self.firewall = firewall
 
     def start(self):
-        sniff(prn=self.process_packet)
+        sniffer = AsyncSniffer(prn=self.process_packet)
+        self.running = True
+        sniffer.start()
+
+    def stop(self):
+        if self.running:
+            self.sniffer.stop()
+            self.running = False
 
     def process_packet(self, pkt):
         
