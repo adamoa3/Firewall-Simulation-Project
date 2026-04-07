@@ -13,11 +13,17 @@ class PacketSniffer(QObject):
         self.firewall = firewall
 
     def start(self):
-        sniffer = AsyncSniffer(prn=self.process_packet)
+        # TESTING
+        print("starting sniffer")
+
+        self.sniffer = AsyncSniffer(prn=self.process_packet)
         self.running = True
-        sniffer.start()
+        self.sniffer.start()
 
     def stop(self):
+        # TESTING
+        print("stopping sniffer")
+
         if self.running:
             self.sniffer.stop()
             self.running = False
