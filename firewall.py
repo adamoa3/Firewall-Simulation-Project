@@ -1,3 +1,18 @@
+from PyQt6.QtWidgets import (
+    QDialog,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QComboBox
+)
+
+class RuleWindow(QDialog):
+    def __init__(self):
+        super.__init__()
+        self.setWindowTitle("Add Rule")
+
 """
     Rule format: dict with the same keys as defined in packet_sniff.py data
     Categories left empty will not be checked
@@ -32,7 +47,6 @@ class Firewall:
         self.rules.append(rule)
 
 
-    
 # takes a single rule and matches it against a packet's data
 # returns true if all is a match, false otherwise
 def rule_match(rule, data):
