@@ -11,7 +11,8 @@ from PyQt6.QtWidgets import (
     QGridLayout,
     QLabel,
     QPushButton,
-    QTableWidget
+    QTableWidget,
+    QTableWidgetItem
 )
 
 class MainWindow(QMainWindow):
@@ -33,6 +34,7 @@ class MainWindow(QMainWindow):
         grid = QGridLayout()
         center.setLayout(grid)
 
+
         # start button
         self.start_button = QPushButton("Start")
         self.start_button.setFixedSize(80, 40)
@@ -46,10 +48,29 @@ class MainWindow(QMainWindow):
         self.stop_button.clicked.connect(self.packet_sniffer.stop)
         grid.addWidget(self.stop_button, 0, 1, Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignHCenter)
 
+        # packet table
+        self.pkt_table = QTableWidget()
+        self.pkt_table.setColumnCount(6)
+        self.pkt_table.setHorizontalHeaderLabels(["src_ip", "dst_ip", "protocol", "src_port", "dst_port", "action"])
+        grid.addWidget(self.pkt_table, 0, 0, Qt.AlignmentFlag.AlignVCenter)
+
+
 
     # takes in packet values and displays in GUI
     def handle_data(self, data):
-        print(data)
+
+        ind = self.pkt_table.rowCount()
+        self.pkt_table.insertRow(ind)
+
+        self.pkt_table.setItem(ind, 0, QTableWidgetItem(data["src_ip"]))
+        self.pkt_table.setItem(ind, 1, QTableWidgetItem(data["dst_ip"]))
+        #self.pkt_table.setItem(ind, 2, QTableWidgetItem(data["protocol"]))
+        #self.pkt_table.setItem(ind, 3, QTableWidgetItem(data["src_port"]))
+        #self.pkt_table.setItem(ind, 4, QTableWidgetItem(data["dst_port"]))
+        self.pkt_table.setItem(ind, 5, QTableWidgetItem(data["action"]))
+        
+        # TESTING
+        #print(data)
 
 
 
