@@ -46,16 +46,23 @@ class MainWindow(QMainWindow):
         self.stop_button.setFixedSize(80, 40)
         self.stop_button.clicked.connect(self.packet_sniffer.stop)
 
+        # add-rule button
+        self.add_button = QPushButton("+")
+        self.add_button.setFixedSize(60, 40)
+        self.add_button.clicked.connect(self.add_button_pressed)
+
         # set up button inner-layout
         button_layout = QHBoxLayout()
         button_layout.addWidget(self.start_button)
+        button_layout.addWidget(self.add_button)
         button_layout.addWidget(self.stop_button)
 
         # packet table
         self.pkt_table = QTableWidget()
         self.pkt_table.setColumnCount(6)
         self.pkt_table.setHorizontalHeaderLabels(["src_ip", "dst_ip", "protocol", "src_port", "dst_port", "action"])
-        
+
+
         # format layout
         layout.addWidget(self.pkt_table, Qt.AlignmentFlag.AlignHCenter)
         layout.addLayout(button_layout)
@@ -67,6 +74,16 @@ class MainWindow(QMainWindow):
         
         # TESTING
         print(data)
+
+    def add_button_pressed(self):
+
+        dialog = RuleWindow()
+
+        if dialog.exec():
+            rule = dialog.get_data()
+            self.firewall.add_rule(rule)
+            print(rule)
+
 
 
 
