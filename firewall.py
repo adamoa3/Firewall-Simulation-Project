@@ -31,7 +31,7 @@ class Firewall:
     def add_rule(self, rule):
         self.rules.append(rule)
 
-    def change_dafult(self, policy):
+    def change_default(self, policy):
         self.default_policy = policy
 
 
@@ -169,3 +169,38 @@ def get_str(value):
         return None
     else:
         return value
+
+# allows the user to change default action
+class ActionWindow(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Change Default Action")
+
+        layout = QVBoxLayout()
+        layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.setLayout(layout)
+
+        self.action = QComboBox()
+        self.action.addItems(["PASS", "BLOCK", "REJECT"])
+        layout.addWidget(QLabel("Action"))
+        layout.addWidget(self.action)
+
+        layout.addSpacing(20)
+
+        button_layout = QHBoxLayout()
+        
+        add_button = QPushButton("Change")
+        add_button.clicked.connect(self.accept)
+        button_layout.addWidget(add_button)
+        
+        cancel_button = QPushButton("Cancel")
+        cancel_button.clicked.connect(self.reject)
+        button_layout.addWidget(cancel_button)
+
+        layout.addLayout(button_layout)
+
+    def get_action(self):
+        return get_str(self.action.currentText())
+
+
+

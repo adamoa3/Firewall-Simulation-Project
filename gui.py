@@ -1,6 +1,6 @@
 import sys
 
-from firewall import Firewall, RuleWindow
+from firewall import Firewall, RuleWindow, ActionWindow
 from packet_sniff import PacketSniffer
 from data_display import PacketModel, RuleModel
 
@@ -42,7 +42,7 @@ class MainWindow(QMainWindow):
         toolbar = self.addToolBar("Tools")
         toolbar.setIconSize(QSize(24, 24))
 
-        # exit
+        # exit tool
         exit_action = QAction("Exit", self)
         exit_action.triggered.connect(self.exit_app)
         toolbar.addAction(exit_action)
@@ -52,16 +52,20 @@ class MainWindow(QMainWindow):
         clear_pkt_action.triggered.connect(self.clear_pkts)
         toolbar.addAction(clear_pkt_action)
 
-        # clear rules
+        # clear rule table tool
         clear_rule_action = QAction("Clear Rules", self)
         clear_rule_action.triggered.connect(self.clear_rules)
         toolbar.addAction(clear_rule_action)
+
+        # change default tool
+        change_default_action = QAction("Change Default", self)
+        change_default_action.triggered.connect(self.change_default)
+        toolbar.addAction(change_default_action)
 
         # packet table
         self.pkt_model = PacketModel()
         self.pkt_table = QTableView()
         self.pkt_table.setModel(self.pkt_model)
-        #layout.addWidget(self.pkt_table, Qt.AlignmentFlag.AlignHCenter)
 
         # rule display
         self.rule_model = RuleModel(self.firewall)
@@ -75,10 +79,6 @@ class MainWindow(QMainWindow):
 
         layout.addLayout(table_layout)
 
-
-        # state display
-        self.state_display = QTableWidget()
-        layout.addWidget(self.state_display)
         
 
 
@@ -144,6 +144,14 @@ class MainWindow(QMainWindow):
         self.rule_model.beginResetModel()
         self.rule_model.firewall.rules.clear()
         self.rule_model.endResetModel()
+
+    def change_default(self):
+        dialog = ActionWindow()
+
+        if dialog.exec():
+            action = dialog.get_action()
+            self.firewall.change_default(action)
+
 
     def exit_app(self):
         QApplication.quit()
