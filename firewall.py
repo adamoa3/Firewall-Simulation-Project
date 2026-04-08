@@ -8,13 +8,13 @@
             "protocol": None,
             "src_port": 80,
             "dst_port": None,
-            "action": "ALLOW"
+            "action": "PASS"
         }
 """
 
 class Firewall:
 
-    def __init__(self, default_policy = "ALLOW"):
+    def __init__(self, default_policy = "PASS"):
         self.rules = []
         self.default_policy = default_policy
 
@@ -76,7 +76,7 @@ class RuleWindow(QDialog):
         self.setLayout(layout)
 
         # description
-        desc = "Fields left empty will not be checked against incoming packets. Type 'Any' in the IP address fields to make any IP address a match."
+        desc = "Fields left empty will be counted as 'Any' which means any value in that field will match the rule."
         self.desc_box = QLabel(desc)
         self.desc_box.setWordWrap(True)
         self.desc_box.setAlignment(Qt.AlignmentFlag.AlignLeft)
