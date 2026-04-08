@@ -35,6 +35,16 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(center)
         center.setLayout(layout)
 
+        # packet table
+        self.pkt_table = QTableWidget()
+        self.pkt_table.setColumnCount(6)
+        self.pkt_table.setHorizontalHeaderLabels(["src_ip", "dst_ip", "protocol", "src_port", "dst_port", "action"])
+        layout.addWidget(self.pkt_table, Qt.AlignmentFlag.AlignHCenter)
+
+        # rule display
+        
+
+
         # start button
         self.start_button = QPushButton("Start")
         self.start_button.setFixedSize(80, 40)
@@ -50,22 +60,15 @@ class MainWindow(QMainWindow):
         self.add_button = QPushButton("+")
         self.add_button.setFixedSize(60, 40)
         self.add_button.clicked.connect(self.add_button_pressed)
+        self.add_button.setToolTip("Add rule")
 
         # set up button inner-layout
         button_layout = QHBoxLayout()
         button_layout.addWidget(self.start_button)
         button_layout.addWidget(self.add_button)
         button_layout.addWidget(self.stop_button)
-
-        # packet table
-        self.pkt_table = QTableWidget()
-        self.pkt_table.setColumnCount(6)
-        self.pkt_table.setHorizontalHeaderLabels(["src_ip", "dst_ip", "protocol", "src_port", "dst_port", "action"])
-
-
-        # format layout
-        layout.addWidget(self.pkt_table, Qt.AlignmentFlag.AlignHCenter)
         layout.addLayout(button_layout)
+
 
 
 
@@ -82,11 +85,9 @@ class MainWindow(QMainWindow):
         if dialog.exec():
             rule = dialog.get_data()
             self.firewall.add_rule(rule)
-            print(rule)
 
-
-
-
+            # TESTING
+            print(f"Adding rule: {rule}")
 
 
 
