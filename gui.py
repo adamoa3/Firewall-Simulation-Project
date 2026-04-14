@@ -1,9 +1,11 @@
 import sys
 
-from firewall import Firewall, RuleWindow
+from firewall import Firewall, RuleWindow, ActionWindow
 from packet_sniff import PacketSniffer
+from data_display import PacketModel, RuleModel
 
-from PyQt6.QtCore import QObject, QThread, pyqtSignal, QSize, Qt
+from PyQt6.QtCore import QObject, QThread, pyqtSignal, QModelIndex, QSize, Qt
+from PyQt6.QtGui import QAction, QIcon
 from PyQt6.QtWidgets import (
     QApplication, 
     QWidget, 
@@ -13,7 +15,8 @@ from PyQt6.QtWidgets import (
     QLabel,
     QPushButton,
     QTableWidget,
-    QTableWidgetItem
+    QTableWidgetItem,
+    QTableView
 )
 
 class MainWindow(QMainWindow):
@@ -35,14 +38,61 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(center)
         center.setLayout(layout)
 
+        # set up toolbar
+        toolbar = self.addToolBar("Tools")
+        toolbar.setIconSize(QSize(24, 24))
+
+        # exit tool
+        exit_action = QAction("Exit", self)
+        exit_action.triggered.connect(self.exit_app)
+        toolbar.addAction(exit_action)
+
+        # clear pkt table tool
+        clear_pkt_action = QAction("Clear Packets", self)
+        clear_pkt_action.triggered.connect(self.clear_pkts)
+        toolbar.addAction(clear_pkt_action)
+
+        # clear rule table tool
+        clear_rule_action = QAction("Clear Rules", self)
+        clear_rule_action.triggered.connect(self.clear_rules)
+        toolbar.addAction(clear_rule_action)
+
+        # change default tool
+        change_default_action = QAction("Change Default", self)
+        change_default_action.triggered.connect(self.change_default)
+        toolbar.addAction(change_default_action)
+
         # packet table
-        self.pkt_table = QTableWidget()
-        self.pkt_table.setColumnCount(6)
-        self.pkt_table.setHorizontalHeaderLabels(["src_ip", "dst_ip", "protocol", "src_port", "dst_port", "action"])
-        layout.addWidget(self.pkt_table, Qt.AlignmentFlag.AlignHCenter)
+        self.pkt_model = PacketModel()
+        self.pkt_table = QTableView()
+        self.pkt_table.setModel(self.pkt_model)
 
         # rule display
+        self.rule_model = RuleModel(self.firewall)
+        self.rule_table = QTableView()
+        self.rule_table.setModel(self.rule_model)
+
+        #table_layout = QHBoxLayout()
+        #table_layout.addWidget(self.pkt_table)
+        #table_layout.addWidget(self.rule_table)
+
+        #layout.addLayout(table_layout)
+
+        # state table
+        self.state_table = QTableView()
+        #layout.addWidget(self.state_table)
+
         
+        # REDO LAYOUT
+        right_side = QVBoxLayout()
+        right_side.addWidget(self.rule_table)
+        right_side.addWidget(self.state_table)
+
+        table_layout = QHBoxLayout()
+        table_layout.addWidget(self.pkt_table)
+        table_layout.addLayout(right_side)
+
+        layout.addLayout(table_layout)
 
 
         # start button
@@ -74,9 +124,20 @@ class MainWindow(QMainWindow):
 
     # takes in packet values and displays in GUI
     def handle_data(self, data):
-        
+
+        self.pkt_model.packets.append(data)
+
+        row = len(self.pkt_model.packets)
+
+        self.pkt_model.beginInsertRows(QModelIndex(), row, row)
+        self.pkt_model.packets.append(data)
+        self.pkt_model.endInsertRows()
+
+        self.pkt_table.scrollToBottom()
+
         # TESTING
         print(data)
+        
 
     def add_button_pressed(self):
 
@@ -84,10 +145,35 @@ class MainWindow(QMainWindow):
 
         if dialog.exec():
             rule = dialog.get_data()
-            self.firewall.add_rule(rule)
+            row = len(self.firewall.rules)
 
+            self.rule_model.beginInsertRows(QModelIndex(), row, row)
+            self.firewall.add_rule(rule)
+            self.rule_model.endInsertRows()
+            
             # TESTING
             print(f"Adding rule: {rule}")
+
+    def clear_pkts(self):
+        self.pkt_model.beginResetModel()
+        self.pkt_model.packets.clear()
+        self.pkt_model.endResetModel()
+
+    def clear_rules(self):
+        self.rule_model.beginResetModel()
+        self.rule_model.firewall.rules.clear()
+        self.rule_model.endResetModel()
+
+    def change_default(self):
+        dialog = ActionWindow()
+
+        if dialog.exec():
+            action = dialog.get_action()
+            self.firewall.change_default(action)
+
+
+    def exit_app(self):
+        QApplication.quit()
 
 
 
