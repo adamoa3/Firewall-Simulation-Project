@@ -1,6 +1,7 @@
 from PyQt6.QtCore import QObject, pyqtSignal
 from scapy.all import AsyncSniffer, sniff, IP, TCP, UDP, ICMP
 from firewall import Firewall
+from ipaddress import ip_address
 
 class PacketSniffer(QObject):
 
@@ -55,13 +56,12 @@ def get_packet_values(pkt):
             "src_port": None,
             "dst_port": None,
             "protocol": None,
+            "interface": None,
             "action": None}
 
     if pkt.haslayer(IP):
         data["src_ip"] = pkt[IP].src
         data["dst_ip"] = pkt[IP].dst
-    else:
-        return []
     
     if pkt.haslayer(TCP):
         data["src_port"] = pkt[TCP].sport 
@@ -77,6 +77,11 @@ def get_packet_values(pkt):
         data["src_port"] = None
         data["dst_port"] = None
         data["protocol"] = "ICMP"
+
+    if data["src_ip"] != None and ip_address(data["src_ip"]).is_private:
+        data["interface"] = "LAN"
+    else:
+        data["interface"] = "WAN"
 
     return data
 

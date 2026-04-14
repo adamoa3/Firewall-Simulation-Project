@@ -72,14 +72,27 @@ class MainWindow(QMainWindow):
         self.rule_table = QTableView()
         self.rule_table.setModel(self.rule_model)
 
+        #table_layout = QHBoxLayout()
+        #table_layout.addWidget(self.pkt_table)
+        #table_layout.addWidget(self.rule_table)
+
+        #layout.addLayout(table_layout)
+
+        # state table
+        self.state_table = QTableView()
+        #layout.addWidget(self.state_table)
+
+        
+        # REDO LAYOUT
+        right_side = QVBoxLayout()
+        right_side.addWidget(self.rule_table)
+        right_side.addWidget(self.state_table)
 
         table_layout = QHBoxLayout()
         table_layout.addWidget(self.pkt_table)
-        table_layout.addWidget(self.rule_table)
+        table_layout.addLayout(right_side)
 
         layout.addLayout(table_layout)
-
-        
 
 
         # start button
@@ -113,11 +126,17 @@ class MainWindow(QMainWindow):
     def handle_data(self, data):
 
         self.pkt_model.packets.append(data)
+
         row = len(self.pkt_model.packets)
+
         self.pkt_model.beginInsertRows(QModelIndex(), row, row)
         self.pkt_model.packets.append(data)
         self.pkt_model.endInsertRows()
+
         self.pkt_table.scrollToBottom()
+
+        # TESTING
+        print(data)
         
 
     def add_button_pressed(self):
