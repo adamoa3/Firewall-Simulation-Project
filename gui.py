@@ -3,6 +3,7 @@ import sys
 from firewall import Firewall, RuleWindow, ActionWindow
 from packet_sniff import PacketSniffer
 from data_display import PacketModel, RuleModel
+from states import StateTracker
 
 from PyQt6.QtCore import QObject, QThread, pyqtSignal, QModelIndex, QSize, Qt
 from PyQt6.QtGui import QAction, QIcon
@@ -26,7 +27,8 @@ class MainWindow(QMainWindow):
 
         # create firewall and packet sniffer objects
         self.firewall = Firewall()
-        self.packet_sniffer = PacketSniffer(self.firewall)
+        self.state_tracker = StateTracker()
+        self.packet_sniffer = PacketSniffer(self.firewall, self.state_tracker)
 
         # set up window
         self.setWindowTitle("Firewall Simulator")
@@ -72,18 +74,11 @@ class MainWindow(QMainWindow):
         self.rule_table = QTableView()
         self.rule_table.setModel(self.rule_model)
 
-        #table_layout = QHBoxLayout()
-        #table_layout.addWidget(self.pkt_table)
-        #table_layout.addWidget(self.rule_table)
-
-        #layout.addLayout(table_layout)
-
         # state table
         self.state_table = QTableView()
-        #layout.addWidget(self.state_table)
 
         
-        # REDO LAYOUT
+        # set up table layout
         right_side = QVBoxLayout()
         right_side.addWidget(self.rule_table)
         right_side.addWidget(self.state_table)
@@ -93,7 +88,6 @@ class MainWindow(QMainWindow):
         table_layout.addLayout(right_side)
 
         layout.addLayout(table_layout)
-
 
         # start button
         self.start_button = QPushButton("Start")
