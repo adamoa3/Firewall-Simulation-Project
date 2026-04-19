@@ -121,8 +121,6 @@ class MainWindow(QMainWindow):
     # takes in packet values and displays in GUI
     def handle_data(self, data):
 
-        self.pkt_model.packets.append(data)
-
         row = len(self.pkt_model.packets)
 
         self.pkt_model.beginInsertRows(QModelIndex(), row, row)
@@ -134,7 +132,13 @@ class MainWindow(QMainWindow):
         # TESTING
         print(data)
 
-    def handle_state(self, state):
+    # updates state table
+    def handle_state(self):
+
+        row = len(self.state_tracker.states)
+
+        self.state_model.beginInsertRows(QModelIndex(), row, row)
+        self.rule_model.endInsertRows()
 
         print("Handling state")
 

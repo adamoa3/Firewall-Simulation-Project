@@ -6,11 +6,15 @@
         it then stores a dictionary of all the other things (host1, host2, time)
 """
 
+from PyQt6.QtCore import QObject, pyqtSignal
 import time
 
-class StateTracker:
+class StateTracker(QObject):
+
+    state_added = pyqtSignal()
 
     def __init__(self):
+        super().__init__()
         self.states = {}
         self.state_keys = []
         self.timeout = 60
@@ -19,12 +23,8 @@ class StateTracker:
     def in_states(self, data):
 
         new_key = make_connection_key(data)
-
-        for key in self.states:
-            if key == new_key:
-                return True
-
-        return False
+        
+        return new_key in self.states
 
     # adds new state by creating key from data and setting up info
     def add_state(self, data):
@@ -49,6 +49,8 @@ class StateTracker:
 
         # update key list
         self.state_keys = list(self.states.keys())
+
+        self.state_added.emit()
 
         # TESTING
         print(f"Added new state: {state}")

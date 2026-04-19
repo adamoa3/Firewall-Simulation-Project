@@ -61,30 +61,35 @@ class StateModel(QAbstractTableModel):
     def __init__(self, state_tracker):
         super().__init__()
         self.state_tracker = state_tracker
+        self.state_tracker.state_added.connect(self.onStateAdded)
 
-        def rowCount(self, parent=None):
-            return len(self.state_tracker.states)
+    def rowCount(self, parent=None):
+        return len(self.state_tracker.states)
         
-        def columnCount(self, parent=None):
-            return 3
+    def columnCount(self, parent=None):
+        return 3
 
-        def data(self, index, role):
-            row = index.row()
-            col = index.column()
+    def data(self, index, role):
+        row = index.row()
+        col = index.column()
 
-            state = self.getState(row)
-            keys = ["hosts", "protocol", "expires"]
-            value = state[keys[col]]
+        state = self.getState(row)
+        keys = ["hosts", "protocol", "expires"]
+        value = state[keys[col]]
 
-            return "" if value is None else str(value)
+        return "" if value is None else str(value)
 
-        def headerData(self, section, orientation, role):
-            if role == Qt.ItemDataRole.DisplayRole:
-                if orientation == Qt.Orientation.Horizontal:
-                    headers = ["Connection", "Protocol", "Expiration Time"]
-                    return headers[section]
+    def headerData(self, section, orientation, role):
+        if role == Qt.ItemDataRole.DisplayRole:
+            if orientation == Qt.Orientation.Horizontal:
+                headers = ["Connection", "Protocol", "Expiration Time"]
+                return headers[section]
 
-        # returns key and value of state for row (to display)
-        def getState(self, row):
-            key = self.state_keys[row]
-            return self.states[key]
+    # returns key and value of state for row (to display)
+    def getState(self, row):
+        key = self.state_tracker.state_keys[row]
+        return self.state_tracker.states[key]
+
+    def onStateAdded(self):
+        self.beginResetModel()
+        self.endResetModel()
