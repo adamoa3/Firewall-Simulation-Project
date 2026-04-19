@@ -17,7 +17,8 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QTableWidget,
     QTableWidgetItem,
-    QTableView
+    QTableView,
+    QHeaderView
 )
 
 class MainWindow(QMainWindow):
@@ -79,6 +80,12 @@ class MainWindow(QMainWindow):
         self.state_table = QTableView()
         self.state_table.setModel(self.state_model)
 
+        # edit state table column size
+        header = self.state_table.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+        #self.state_table.setWordWrap(True)
         
         # set up table layout
         right_side = QVBoxLayout()

@@ -1,4 +1,5 @@
-from PyQt6.QtCore import QAbstractTableModel, Qt
+from PyQt6.QtCore import QAbstractTableModel, QModelIndex, Qt
+import time
 
 class PacketModel(QAbstractTableModel):
     def __init__(self):
@@ -70,14 +71,23 @@ class StateModel(QAbstractTableModel):
         return 3
 
     def data(self, index, role):
-        row = index.row()
-        col = index.column()
+        if role == Qt.ItemDataRole.DisplayRole:
 
-        state = self.getState(row)
-        keys = ["hosts", "protocol", "expires"]
-        value = state[keys[col]]
 
-        return "" if value is None else str(value)
+            row = index.row()
+            col = index.column()
+
+            state = self.getState(row)
+            keys = ["hosts", "protocol", "expires"]
+            value = state[keys[col]]
+
+            if keys[col] == "expires":
+                time_left = int(value - time.time())
+                value = str(max(0, time_left)) + "s"
+
+            return "" if value is None else str(value)
+
+        return None
 
     def headerData(self, section, orientation, role):
         if role == Qt.ItemDataRole.DisplayRole:
@@ -90,6 +100,6 @@ class StateModel(QAbstractTableModel):
         key = self.state_tracker.state_keys[row]
         return self.state_tracker.states[key]
 
-    def onStateAdded(self):
-        self.beginResetModel()
-        self.endResetModel()
+    def onStateAdded(self, row):
+        self.beginInsertRows(QModelIndex(), row, row)
+        self.endInsertRows()

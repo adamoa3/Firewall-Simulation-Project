@@ -11,7 +11,7 @@ import time
 
 class StateTracker(QObject):
 
-    state_added = pyqtSignal()
+    state_added = pyqtSignal(int)
 
     def __init__(self):
         super().__init__()
@@ -23,7 +23,7 @@ class StateTracker(QObject):
     def in_states(self, data):
 
         new_key = make_connection_key(data)
-        
+
         return new_key in self.states
 
     # adds new state by creating key from data and setting up info
@@ -50,7 +50,8 @@ class StateTracker(QObject):
         # update key list
         self.state_keys = list(self.states.keys())
 
-        self.state_added.emit()
+        row = len(self.state_keys) - 1
+        self.state_added.emit(row)
 
         # TESTING
         print(f"Added new state: {state}")
