@@ -1,4 +1,5 @@
-from PyQt6.QtCore import QAbstractTableModel, Qt
+from PyQt6.QtCore import QAbstractTableModel, QModelIndex, Qt
+import time
 
 class PacketModel(QAbstractTableModel):
     def __init__(self):
@@ -54,3 +55,51 @@ class RuleModel(QAbstractTableModel):
             if orientation == Qt.Orientation.Horizontal:
                 headers = ["Source IP", "Dest. IP", "Protocol", "Source Port", "Dest. Port", "Action"]
                 return headers[section]
+
+
+class StateModel(QAbstractTableModel):
+
+    def __init__(self, state_tracker):
+        super().__init__()
+        self.state_tracker = state_tracker
+        self.state_tracker.state_added.connect(self.onStateAdded)
+
+    def rowCount(self, parent=None):
+        return len(self.state_tracker.states)
+        
+    def columnCount(self, parent=None):
+        return 3
+
+    def data(self, index, role):
+        if role == Qt.ItemDataRole.DisplayRole:
+
+
+            row = index.row()
+            col = index.column()
+
+            state = self.getState(row)
+            keys = ["hosts", "protocol", "expires"]
+            value = state[keys[col]]
+
+            if keys[col] == "expires":
+                time_left = int(value - time.time())
+                value = str(max(0, time_left)) + "s"
+
+            return "" if value is None else str(value)
+
+        return None
+
+    def headerData(self, section, orientation, role):
+        if role == Qt.ItemDataRole.DisplayRole:
+            if orientation == Qt.Orientation.Horizontal:
+                headers = ["Connection", "Protocol", "Expiration Time"]
+                return headers[section]
+
+    # returns key and value of state for row (to display)
+    def getState(self, row):
+        key = self.state_tracker.state_keys[row]
+        return self.state_tracker.states[key]
+
+    def onStateAdded(self, row):
+        self.beginInsertRows(QModelIndex(), row, row)
+        self.endInsertRows()
