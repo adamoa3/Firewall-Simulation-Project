@@ -1,9 +1,9 @@
 """
     State format:
-        Not all info will be displayed, only dns lookup result, direction, and action (?)
+        Not all info from packets will be displayed)
         states itself is a dictionary
         key is the connection key created from ports etc
-        it then stores a dictionary of all the other things (com1, com2, time)
+        it then stores a dictionary of all the other things (host1, host2, time)
 """
 
 import time
@@ -12,6 +12,7 @@ class StateTracker:
 
     def __init__(self):
         self.states = {}
+        self.state_keys = []
         self.timeout = 60
 
     # checks if the packet is already present in a state
@@ -33,16 +34,28 @@ class StateTracker:
 
         # set up state values
         state = {
-            "expires": time.time() + self.timeout
+            "hosts": None,
+            "protocol": None,
+            "expires": None
         }
 
-        # perform dns lookup
+        # fill in info
+        state["hosts"] = data["src_ip"] + " <--> " + data["dst_ip"]
+        state["protocol"] = data["protocol"]
+        state["expires"] = time.time() + self.timeout
 
         # put key:value pair in dictionary
         self.states[key] = state
 
+        # update key list
+        self.state_keys = list(self.states.keys())
+
         # TESTING
         print(f"Added new state: {state}")
+
+    def delete_state(self, key):
+        self.states.pop(key)
+        # send signal to gui
 
 
 def make_connection_key(data):

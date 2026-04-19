@@ -2,7 +2,7 @@ import sys
 
 from firewall import Firewall, RuleWindow, ActionWindow
 from packet_sniff import PacketSniffer
-from data_display import PacketModel, RuleModel
+from data_display import PacketModel, RuleModel, StateModel
 from states import StateTracker
 
 from PyQt6.QtCore import QObject, QThread, pyqtSignal, QModelIndex, QSize, Qt
@@ -75,7 +75,9 @@ class MainWindow(QMainWindow):
         self.rule_table.setModel(self.rule_model)
 
         # state table
+        self.state_model = StateModel(self.state_tracker)
         self.state_table = QTableView()
+        self.state_table.setModel(self.state_model)
 
         
         # set up table layout
@@ -131,6 +133,11 @@ class MainWindow(QMainWindow):
 
         # TESTING
         print(data)
+
+    def handle_state(self, state):
+
+        print("Handling state")
+
         
 
     def add_button_pressed(self):
