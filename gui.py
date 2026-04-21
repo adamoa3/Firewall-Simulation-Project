@@ -85,6 +85,9 @@ class MainWindow(QMainWindow):
         self.state_table = QTableView()
         self.state_table.setModel(self.state_model)
 
+        # set up timed refresh for states
+        self.timer.timeout.connect(self.state_model.refresh)
+
         # edit state table column size
         header = self.state_table.horizontalHeader()
         header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)

@@ -108,3 +108,17 @@ class StateModel(QAbstractTableModel):
     def onStateRemoved(self, row):
         self.beginRemoveRows(QModelIndex(), row, row)
         self.endRemoveRows()
+
+    def refresh(self):
+        if self.rowCount() == 0:
+            return
+
+        # expiration col
+        EXP = 2
+
+        self.dataChanged.emit(
+            self.index(0, EXP),
+            self.index(self.rowCount() - 1, EXP)
+        )
+
+        
