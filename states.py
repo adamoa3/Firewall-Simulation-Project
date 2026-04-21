@@ -1,6 +1,6 @@
 """
     State format:
-        Not all info from packets will be displayed)
+        Not all info from packets will be displayed
         states itself is a dictionary
         key is the connection key created from ports etc
         it then stores a dictionary of all the other things (host1, host2, time)
@@ -12,6 +12,7 @@ import time
 class StateTracker(QObject):
 
     state_added = pyqtSignal(int)
+    state_removed = pyqtSignal(int)
 
     def __init__(self):
         super().__init__()
@@ -57,8 +58,26 @@ class StateTracker(QObject):
         print(f"Added new state: {state}")
 
     def delete_state(self, key):
+        
+        row = self.state_keys.index(key)
+
         self.states.pop(key)
+        self.state_keys.remove(key)
+
         # send signal to gui
+        self.state_removed.emit(row)
+
+    def cleanup_states(self):
+        now = time.time()
+
+        expired = []
+        for key in self.state_keys:
+            if self.states[key]["expires"] <= now:
+                expired.append(key)
+
+        for key in expired:
+            self.delete_state(key)
+
 
 
 def make_connection_key(data):

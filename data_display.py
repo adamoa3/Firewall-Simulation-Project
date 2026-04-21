@@ -63,6 +63,7 @@ class StateModel(QAbstractTableModel):
         super().__init__()
         self.state_tracker = state_tracker
         self.state_tracker.state_added.connect(self.onStateAdded)
+        self.state_tracker.state_removed.connect(self.onStateRemoved)
 
     def rowCount(self, parent=None):
         return len(self.state_tracker.states)
@@ -103,3 +104,7 @@ class StateModel(QAbstractTableModel):
     def onStateAdded(self, row):
         self.beginInsertRows(QModelIndex(), row, row)
         self.endInsertRows()
+
+    def onStateRemoved(self, row):
+        self.beginRemoveRows(QModelIndex(), row, row)
+        self.endRemoveRows()

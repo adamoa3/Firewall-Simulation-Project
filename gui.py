@@ -5,7 +5,7 @@ from packet_sniff import PacketSniffer
 from data_display import PacketModel, RuleModel, StateModel
 from states import StateTracker
 
-from PyQt6.QtCore import QObject, QThread, pyqtSignal, QModelIndex, QSize, Qt
+from PyQt6.QtCore import QObject, QThread, pyqtSignal, QModelIndex, QSize, Qt, QTimer
 from PyQt6.QtGui import QAction, QIcon
 from PyQt6.QtWidgets import (
     QApplication, 
@@ -26,10 +26,15 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        # create firewall and packet sniffer objects
+        # create firewall, packet sniffer, and state tracker objects
         self.firewall = Firewall()
         self.state_tracker = StateTracker()
         self.packet_sniffer = PacketSniffer(self.firewall, self.state_tracker)
+
+        # set up timer for state expirations
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.state_tracker.cleanup_states)
+        self.timer.start(1000)
 
         # set up window
         self.setWindowTitle("Firewall Simulator")
@@ -149,8 +154,6 @@ class MainWindow(QMainWindow):
 
         print("Handling state")
 
-        
-
     def add_button_pressed(self):
 
         dialog = RuleWindow()
@@ -186,8 +189,6 @@ class MainWindow(QMainWindow):
 
     def exit_app(self):
         QApplication.quit()
-
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
