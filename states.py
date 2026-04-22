@@ -7,7 +7,9 @@
 """
 
 from PyQt6.QtCore import QObject, pyqtSignal
+from ipaddress import ip_address
 import time
+import socket
 
 class StateTracker(QObject):
 
@@ -41,7 +43,7 @@ class StateTracker(QObject):
         }
 
         # fill in info
-        state["hosts"] = data["src_ip"] + " <--> " + data["dst_ip"]
+        state["hosts"] = get_connection_str(data["src_ip"], data["dst_ip"], data["src_port"], data["dst_port"])
         state["protocol"] = data["protocol"]
         state["expires"] = time.time() + self.timeout
 
@@ -87,4 +89,33 @@ def make_connection_key(data):
     endpoints = sorted([src_info, dst_info])
 
     return (endpoints[0], endpoints[1], data["protocol"])
+
+def get_connection_str(src, dst, src_port, dst_port):
+
+    host1 = try_dns(src)
+    host2 = try_dns(dst)
+
+    port1 = str(src_port) if (src_port is not None) else ""
+    port2 = str(dst_port) if (dst_port is not None) else ""
+
+    conn = host1 + ": " + port1 + " <--> " + host2 + ": " + port2
+
+    return conn
+
+    
+def try_dns(addr):
+
+    if not ip_address(addr).is_private:
+        try:
+            host, _, _ = socket.gethostbyaddr(addr)
+            print(f"Host found {host}")
+            return host
+        except socket.herror:
+            print(f"Unknown host {addr}")
+            return addr
+
+    return addr
+
+
+
 
