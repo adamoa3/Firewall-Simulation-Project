@@ -140,9 +140,6 @@ class MainWindow(QMainWindow):
         button_layout.addWidget(self.stop_button)
         layout.addLayout(button_layout)
 
-
-
-
     # takes in packet values and displays in GUI
     def handle_data(self, data):
 
@@ -206,13 +203,9 @@ class MainWindow(QMainWindow):
             new_time = dialog.get_time()
             self.state_tracker.change_default(new_time)
 
-
     def reorder_rules(self):
         dialog = ReorderWindow(self.firewall, self.rule_model)
-
         dialog.exec()
-        
-        return 0
 
     def exit_app(self):
         QApplication.quit()
