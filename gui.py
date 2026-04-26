@@ -1,6 +1,6 @@
 import sys
 
-from firewall import Firewall, RuleWindow, ActionWindow
+from firewall import Firewall, RuleWindow, ActionWindow, ReorderWindow
 from packet_sniff import PacketSniffer
 from data_display import PacketModel, RuleModel, StateModel
 from states import StateTracker, TimeoutWindow
@@ -78,7 +78,7 @@ class MainWindow(QMainWindow):
 
         # reorder rules tool
         reorder_rules_action = QAction("Reorder Rules", self)
-        #reorder_rules_action.triggered.connect(self.reorder_rules)
+        reorder_rules_action.triggered.connect(self.reorder_rules)
         toolbar.addAction(reorder_rules_action)
 
         # packet table
@@ -208,6 +208,10 @@ class MainWindow(QMainWindow):
 
 
     def reorder_rules(self):
+        dialog = ReorderWindow(self.firewall, self.rule_model)
+
+        dialog.exec()
+        
         return 0
 
     def exit_app(self):
