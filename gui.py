@@ -3,7 +3,7 @@ import sys
 from firewall import Firewall, RuleWindow, ActionWindow
 from packet_sniff import PacketSniffer
 from data_display import PacketModel, RuleModel, StateModel
-from states import StateTracker
+from states import StateTracker, TimeoutWindow
 
 from PyQt6.QtCore import QObject, QThread, pyqtSignal, QModelIndex, QSize, Qt, QTimer
 from PyQt6.QtGui import QAction, QIcon
@@ -18,7 +18,8 @@ from PyQt6.QtWidgets import (
     QTableWidget,
     QTableWidgetItem,
     QTableView,
-    QHeaderView
+    QHeaderView,
+    QMenu
 )
 
 class MainWindow(QMainWindow):
@@ -65,10 +66,20 @@ class MainWindow(QMainWindow):
         clear_rule_action.triggered.connect(self.clear_rules)
         toolbar.addAction(clear_rule_action)
 
-        # change default tool
-        change_default_action = QAction("Change Default", self)
-        change_default_action.triggered.connect(self.change_default)
+        # change default action tool
+        change_default_action = QAction("Change Default Action", self)
+        change_default_action.triggered.connect(self.change_default_rule)
         toolbar.addAction(change_default_action)
+
+        # change default timeout tool
+        change_default_timeout = QAction("Change Default Timeout", self)
+        change_default_timeout.triggered.connect(self.change_default_timeout)
+        toolbar.addAction(change_default_timeout)
+
+        # reorder rules tool
+        reorder_rules_action = QAction("Reorder Rules", self)
+        #reorder_rules_action.triggered.connect(self.reorder_rules)
+        toolbar.addAction(reorder_rules_action)
 
         # packet table
         self.pkt_model = PacketModel()
@@ -93,7 +104,6 @@ class MainWindow(QMainWindow):
         header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
         header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
-        #self.state_table.setWordWrap(True)
         
         # set up table layout
         right_side = QVBoxLayout()
@@ -182,13 +192,23 @@ class MainWindow(QMainWindow):
         self.rule_model.firewall.rules.clear()
         self.rule_model.endResetModel()
 
-    def change_default(self):
+    def change_default_rule(self):
         dialog = ActionWindow()
 
         if dialog.exec():
             action = dialog.get_action()
             self.firewall.change_default(action)
 
+    def change_default_timeout(self):
+        dialog = TimeoutWindow(self.state_tracker.timeout)
+        
+        if dialog.exec():
+            new_time = dialog.get_time()
+            self.state_tracker.change_default(new_time)
+
+
+    def reorder_rules(self):
+        return 0
 
     def exit_app(self):
         QApplication.quit()
