@@ -11,6 +11,17 @@
             "action": "PASS"
         }
 """
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import (
+    QDialog,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QComboBox,
+    QListWidget
+)
 
 class Firewall:
 
@@ -51,17 +62,6 @@ def rule_match(rule, data):
     # return true if all match
     return True
 
-
-from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import (
-    QDialog,
-    QVBoxLayout,
-    QHBoxLayout,
-    QLabel,
-    QLineEdit,
-    QPushButton,
-    QComboBox
-)
 
 # popup window that appears when the user creates a new rule
 class RuleWindow(QDialog):
@@ -157,18 +157,6 @@ class RuleWindow(QDialog):
 
         return rule
 
-# will return number or None
-def get_int(value):
-    value = value.strip()
-    return int(value) if value else None
-    
-# will return string or None
-def get_str(value):
-    value = value.strip()
-    if not value or value == "None":
-        return None
-    else:
-        return value
 
 # allows the user to change default action
 class ActionWindow(QDialog):
@@ -201,6 +189,100 @@ class ActionWindow(QDialog):
 
     def get_action(self):
         return get_str(self.action.currentText())
+
+
+# allows the user to reorder firewall rules
+class ReorderWindow(QDialog):
+    def __init__(self, firewall, model):
+        super().__init__()
+        self.firewall = firewall
+        self.rule_model = model
+        self.setWindowTitle("Reorder Firewall Rules")
+
+        layout = QVBoxLayout()
+        layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.setLayout(layout)
+
+        self.rule_list = QListWidget()
+        self.load_rules()
+        layout.addWidget(self.rule_list)
+
+        button_layout = QHBoxLayout()
+
+        up_button = QPushButton("Move Up")
+        up_button.clicked.connect(self.move_up)
+
+        down_button = QPushButton("Move Down")
+        down_button.clicked.connect(self.move_down)
+
+        button_layout.addWidget(up_button)
+        button_layout.addWidget(down_button)
+        layout.addLayout(button_layout)
+
+        close_button = QPushButton("Close")
+        close_button.clicked.connect(self.accept)
+        layout.addWidget(close_button)
+
+    def move_up(self):
+        # get selected row 
+        row = self.rule_list.currentRow()
+
+        if row <= 0:
+            return
+
+        # swap adjacent rules
+        self.firewall.rules[row], self.firewall.rules[row - 1] = self.firewall.rules[row - 1], self.firewall.rules[row]
+
+        self.load_rules()
+        self.rule_list.setCurrentRow(row - 1)
+        self.rule_model.layoutChanged.emit()
+        
+    def move_down(self): 
+        # get selected row 
+        row = self.rule_list.currentRow()
+        num_rules = len(self.firewall.rules)
+
+        if row < 0 or row >= num_rules - 1:
+            return
+
+        # swap adjacent rules
+        self.firewall.rules[row], self.firewall.rules[row + 1] = self.firewall.rules[row + 1], self.firewall.rules[row]
+
+        self.load_rules()
+        self.rule_list.setCurrentRow(row + 1)
+        self.rule_model.layoutChanged.emit()
+        
+    def load_rules(self):
+        self.rule_list.clear()
+
+        for rule in self.firewall.rules:
+            # create rule shorthand for display
+            text = f"{get_val_any(rule["src_ip"])}: {get_val_any(rule["src_port"])} <--> {get_val_any(rule["dst_ip"])}: {get_val_any(rule["dst_port"])} {get_val_any(rule["protocol"])} {get_val_any(rule["action"])}"
+            self.rule_list.addItem(text)
+
+
+# ensure "Any" is displayed to the user rather than "None"
+def get_val_any(val):
+    if val == None:
+        return "Any"
+    else:
+        return val
+
+# will return number or None
+def get_int(value):
+    value = value.strip()
+    return int(value) if value else None
+    
+# will return string or None
+def get_str(value):
+    value = value.strip()
+    if not value or value == "None":
+        return None
+    else:
+        return value
+
+
+
 
 
 

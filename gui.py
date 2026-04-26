@@ -1,6 +1,6 @@
 import sys
 
-from firewall import Firewall, RuleWindow, ActionWindow
+from firewall import Firewall, RuleWindow, ActionWindow, ReorderWindow
 from packet_sniff import PacketSniffer
 from data_display import PacketModel, RuleModel, StateModel
 from states import StateTracker, TimeoutWindow
@@ -78,7 +78,7 @@ class MainWindow(QMainWindow):
 
         # reorder rules tool
         reorder_rules_action = QAction("Reorder Rules", self)
-        #reorder_rules_action.triggered.connect(self.reorder_rules)
+        reorder_rules_action.triggered.connect(self.reorder_rules)
         toolbar.addAction(reorder_rules_action)
 
         # packet table
@@ -139,9 +139,6 @@ class MainWindow(QMainWindow):
         button_layout.addWidget(self.add_button)
         button_layout.addWidget(self.stop_button)
         layout.addLayout(button_layout)
-
-
-
 
     # takes in packet values and displays in GUI
     def handle_data(self, data):
@@ -206,9 +203,9 @@ class MainWindow(QMainWindow):
             new_time = dialog.get_time()
             self.state_tracker.change_default(new_time)
 
-
     def reorder_rules(self):
-        return 0
+        dialog = ReorderWindow(self.firewall, self.rule_model)
+        dialog.exec()
 
     def exit_app(self):
         QApplication.quit()
