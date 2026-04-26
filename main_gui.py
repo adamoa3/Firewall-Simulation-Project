@@ -1,6 +1,7 @@
 import sys
 
-from firewall import Firewall, RuleWindow, ActionWindow, ReorderWindow
+from firewall import Firewall #, RuleWindow, ActionWindow, ReorderWindow
+from firewall_gui import RuleWindow, ActionWindow, ReorderWindow
 from packet_sniff import PacketSniffer
 from data_display import PacketModel, RuleModel, StateModel
 from states import StateTracker, TimeoutWindow
