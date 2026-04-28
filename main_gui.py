@@ -1,10 +1,11 @@
-import sys
-
-from firewall import Firewall #, RuleWindow, ActionWindow, ReorderWindow
+from firewall import Firewall
 from firewall_gui import RuleWindow, ActionWindow, ReorderWindow
+
 from packet_sniff import PacketSniffer
 from data_display import PacketModel, RuleModel, StateModel
-from states import StateTracker, TimeoutWindow
+
+from states import StateTracker
+from states_gui import TimeoutWindow
 
 from PyQt6.QtCore import QObject, QThread, pyqtSignal, QModelIndex, QSize, Qt, QTimer
 from PyQt6.QtGui import QAction, QIcon
@@ -161,7 +162,7 @@ class MainWindow(QMainWindow):
         row = len(self.state_tracker.states)
 
         self.state_model.beginInsertRows(QModelIndex(), row, row)
-        self.rule_model.endInsertRows()
+        self.state_model.endInsertRows()
 
         print("Handling state")
 
@@ -210,11 +211,3 @@ class MainWindow(QMainWindow):
 
     def exit_app(self):
         QApplication.quit()
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-
-    window = MainWindow()
-    window.show()
-
-    sys.exit(app.exec())
