@@ -84,7 +84,6 @@ class StateTracker(QObject):
         self.timeout = secs
 
 
-
 def make_connection_key(data):
     src_info = (data["src_ip"], data["src_port"])
     dst_info = (data["dst_ip"], data["dst_port"])
@@ -104,8 +103,7 @@ def get_connection_str(src, dst, src_port, dst_port):
     conn = host1 + ": " + port1 + " <--> " + host2 + ": " + port2
 
     return conn
-
-    
+ 
 def try_dns(addr):
 
     if not ip_address(addr).is_private:
