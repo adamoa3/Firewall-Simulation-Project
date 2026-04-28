@@ -1,9 +1,11 @@
-import sys
+from firewall import Firewall
+from firewall_gui import RuleWindow, ActionWindow, ReorderWindow
 
-from firewall import Firewall, RuleWindow, ActionWindow, ReorderWindow
 from packet_sniff import PacketSniffer
 from data_display import PacketModel, RuleModel, StateModel
-from states import StateTracker, TimeoutWindow
+
+from states import StateTracker
+from states_gui import TimeoutWindow
 
 from PyQt6.QtCore import QObject, QThread, pyqtSignal, QModelIndex, QSize, Qt, QTimer
 from PyQt6.QtGui import QAction, QIcon
@@ -51,36 +53,6 @@ class MainWindow(QMainWindow):
         toolbar = self.addToolBar("Tools")
         toolbar.setIconSize(QSize(24, 24))
 
-        # exit tool
-        exit_action = QAction("Exit", self)
-        exit_action.triggered.connect(self.exit_app)
-        toolbar.addAction(exit_action)
-
-        # clear pkt table tool
-        clear_pkt_action = QAction("Clear Packets", self)
-        clear_pkt_action.triggered.connect(self.clear_pkts)
-        toolbar.addAction(clear_pkt_action)
-
-        # clear rule table tool
-        clear_rule_action = QAction("Clear Rules", self)
-        clear_rule_action.triggered.connect(self.clear_rules)
-        toolbar.addAction(clear_rule_action)
-
-        # change default action tool
-        change_default_action = QAction("Change Default Action", self)
-        change_default_action.triggered.connect(self.change_default_rule)
-        toolbar.addAction(change_default_action)
-
-        # change default timeout tool
-        change_default_timeout = QAction("Change Default Timeout", self)
-        change_default_timeout.triggered.connect(self.change_default_timeout)
-        toolbar.addAction(change_default_timeout)
-
-        # reorder rules tool
-        reorder_rules_action = QAction("Reorder Rules", self)
-        reorder_rules_action.triggered.connect(self.reorder_rules)
-        toolbar.addAction(reorder_rules_action)
-
         # packet table
         self.pkt_model = PacketModel()
         self.pkt_table = QTableView()
@@ -98,6 +70,36 @@ class MainWindow(QMainWindow):
 
         # set up timed refresh for states
         self.timer.timeout.connect(self.state_model.refresh)
+
+        # exit tool
+        exit_action = QAction("Exit", self)
+        exit_action.triggered.connect(self.exit_app)
+        toolbar.addAction(exit_action)
+
+        # clear pkt table tool
+        clear_pkt_action = QAction("Clear Packets", self)
+        clear_pkt_action.triggered.connect(self.pkt_model.clear_pkts)
+        toolbar.addAction(clear_pkt_action)
+
+        # clear rule table tool
+        clear_rule_action = QAction("Clear Rules", self)
+        clear_rule_action.triggered.connect(self.rule_model.clear_rules)
+        toolbar.addAction(clear_rule_action)
+
+        # change default action tool
+        change_default_action = QAction("Change Default Action", self)
+        change_default_action.triggered.connect(self.change_default_rule)
+        toolbar.addAction(change_default_action)
+
+        # change default timeout tool
+        change_default_timeout = QAction("Change Default Timeout", self)
+        change_default_timeout.triggered.connect(self.change_default_timeout)
+        toolbar.addAction(change_default_timeout)
+
+        # reorder rules tool
+        reorder_rules_action = QAction("Reorder Rules", self)
+        reorder_rules_action.triggered.connect(self.reorder_rules)
+        toolbar.addAction(reorder_rules_action)
 
         # edit state table column size
         header = self.state_table.horizontalHeader()
@@ -130,7 +132,7 @@ class MainWindow(QMainWindow):
         # add-rule button
         self.add_button = QPushButton("+")
         self.add_button.setFixedSize(60, 40)
-        self.add_button.clicked.connect(self.add_button_pressed)
+        self.add_button.clicked.connect(self.handle_rule)
         self.add_button.setToolTip("Add rule")
 
         # set up button inner-layout
@@ -140,54 +142,26 @@ class MainWindow(QMainWindow):
         button_layout.addWidget(self.stop_button)
         layout.addLayout(button_layout)
 
-    # takes in packet values and displays in GUI
+    # takes in packet values and sends to model to display in GUI
     def handle_data(self, data):
 
-        row = len(self.pkt_model.packets)
-
-        self.pkt_model.beginInsertRows(QModelIndex(), row, row)
-        self.pkt_model.packets.append(data)
-        self.pkt_model.endInsertRows()
-
+        self.pkt_model.insert_pkt(data)
         self.pkt_table.scrollToBottom()
 
         # TESTING
         print(data)
 
-    # updates state table
-    def handle_state(self):
-
-        row = len(self.state_tracker.states)
-
-        self.state_model.beginInsertRows(QModelIndex(), row, row)
-        self.rule_model.endInsertRows()
-
-        print("Handling state")
-
-    def add_button_pressed(self):
+    def handle_rule(self):
 
         dialog = RuleWindow()
 
         if dialog.exec():
+            
             rule = dialog.get_data()
-            row = len(self.firewall.rules)
-
-            self.rule_model.beginInsertRows(QModelIndex(), row, row)
-            self.firewall.add_rule(rule)
-            self.rule_model.endInsertRows()
+            self.rule_model.insert_rule(rule)
             
             # TESTING
             print(f"Adding rule: {rule}")
-
-    def clear_pkts(self):
-        self.pkt_model.beginResetModel()
-        self.pkt_model.packets.clear()
-        self.pkt_model.endResetModel()
-
-    def clear_rules(self):
-        self.rule_model.beginResetModel()
-        self.rule_model.firewall.rules.clear()
-        self.rule_model.endResetModel()
 
     def change_default_rule(self):
         dialog = ActionWindow()
@@ -209,11 +183,3 @@ class MainWindow(QMainWindow):
 
     def exit_app(self):
         QApplication.quit()
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-
-    window = MainWindow()
-    window.show()
-
-    sys.exit(app.exec())

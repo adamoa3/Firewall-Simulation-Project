@@ -26,6 +26,19 @@ class PacketModel(QAbstractTableModel):
                 headers = ["Source IP", "Dest. IP", "Protocol", "Source Port", "Dest. Port", "Action"]
                 return headers[section]
 
+    def insert_pkt(self, data):
+        row = len(self.packets)
+
+        self.beginInsertRows(QModelIndex(), row, row)
+        self.packets.append(data)
+        self.endInsertRows()
+
+    
+    def clear_pkts(self):
+        self.beginResetModel()
+        self.packets.clear()
+        self.endResetModel()
+
 
 # uses firewall directly to get rules
 class RuleModel(QAbstractTableModel):
@@ -56,14 +69,26 @@ class RuleModel(QAbstractTableModel):
                 headers = ["Source IP", "Dest. IP", "Protocol", "Source Port", "Dest. Port", "Action"]
                 return headers[section]
 
+    def insert_rule(self, rule):
+        row = len(self.firewall.rules)
+
+        self.beginInsertRows(QModelIndex(), row, row)
+        self.firewall.add_rule(rule)
+        self.endInsertRows()
+
+    def clear_rules(self):
+        self.beginResetModel()
+        self.firewall.rules.clear()
+        self.endResetModel()
+
 
 class StateModel(QAbstractTableModel):
 
     def __init__(self, state_tracker):
         super().__init__()
         self.state_tracker = state_tracker
-        self.state_tracker.state_added.connect(self.onStateAdded)
-        self.state_tracker.state_removed.connect(self.onStateRemoved)
+        self.state_tracker.state_added.connect(self.state_added)
+        self.state_tracker.state_removed.connect(self.state_removed)
 
     def rowCount(self, parent=None):
         return len(self.state_tracker.states)
@@ -78,7 +103,7 @@ class StateModel(QAbstractTableModel):
             row = index.row()
             col = index.column()
 
-            state = self.getState(row)
+            state = self.get_state(row)
             keys = ["hosts", "protocol", "expires"]
             value = state[keys[col]]
 
@@ -97,15 +122,15 @@ class StateModel(QAbstractTableModel):
                 return headers[section]
 
     # returns key and value of state for row (to display)
-    def getState(self, row):
+    def get_state(self, row):
         key = self.state_tracker.state_keys[row]
         return self.state_tracker.states[key]
 
-    def onStateAdded(self, row):
+    def state_added(self, row):
         self.beginInsertRows(QModelIndex(), row, row)
         self.endInsertRows()
 
-    def onStateRemoved(self, row):
+    def state_removed(self, row):
         self.beginRemoveRows(QModelIndex(), row, row)
         self.endRemoveRows()
 
