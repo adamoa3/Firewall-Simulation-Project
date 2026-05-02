@@ -20,6 +20,7 @@ class StateTracker(QObject):
         super().__init__()
         self.states = {}
         self.state_keys = []
+        self.cache = {}
         self.timeout = 60
 
     # checks if the packet is already present in a state
@@ -43,7 +44,7 @@ class StateTracker(QObject):
         }
 
         # fill in info
-        state["hosts"] = get_connection_str(data["src_ip"], data["dst_ip"], data["src_port"], data["dst_port"])
+        state["hosts"] = get_connection_str(data["src_ip"], data["dst_ip"], data["src_port"], data["dst_port"], self.cache)
         state["protocol"] = data["protocol"]
         state["expires"] = time.time() + self.timeout
 
@@ -89,10 +90,10 @@ def make_connection_key(data):
 
     return (endpoints[0], endpoints[1], data["protocol"])
 
-def get_connection_str(src, dst, src_port, dst_port):
+def get_connection_str(src, dst, src_port, dst_port, cache):
 
-    host1 = try_dns(src)
-    host2 = try_dns(dst)
+    host1 = try_dns(src, cache)
+    host2 = try_dns(dst, cache)
 
     port1 = str(src_port) if (src_port is not None) else ""
     port2 = str(dst_port) if (dst_port is not None) else ""
@@ -101,15 +102,20 @@ def get_connection_str(src, dst, src_port, dst_port):
 
     return conn
  
-def try_dns(addr):
+def try_dns(addr, cache):
 
     if not ip_address(addr).is_private:
+
+        # check cache
+        if addr in cache:
+            return cache[addr]
+
         try:
             host, _, _ = socket.gethostbyaddr(addr)
-            print(f"Host found {host}")
+            cache[addr] = host
             return host
         except socket.herror:
-            print(f"Unknown host {addr}")
+            cache[addr] = addr
             return addr
 
     return addr
