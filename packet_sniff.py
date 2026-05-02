@@ -16,16 +16,16 @@ class PacketSniffer(QObject):
         self.state_tracker = state_tracker
 
     def start(self):
-        # TESTING
-        print("starting sniffer")
+
+        print("Starting sniffer")
 
         self.sniffer = AsyncSniffer(prn=self.process_packet)
         self.running = True
         self.sniffer.start()
 
     def stop(self):
-        # TESTING
-        print("stopping sniffer")
+
+        print("Stopping sniffer")
 
         if self.running:
             self.sniffer.stop()
@@ -111,19 +111,4 @@ def get_packet_values(pkt):
         data["direction"] = "INTERNAL"
 
     return data
-
-
-# TESTING
-
-if __name__ == "__main__":
-    firewall = Firewall()
-    firewall.add_rule({
-            "src_ip": None,
-            "dst_ip": None,
-            "protocol": None,
-            "src_port": 443,
-            "dst_port": None,
-            "action": "BLOCK"})
-    sniffer = PacketSniffer(firewall)
-    sniffer.start()
 

@@ -148,8 +148,6 @@ class MainWindow(QMainWindow):
         self.pkt_model.insert_pkt(data)
         self.pkt_table.scrollToBottom()
 
-        # TESTING
-        print(data)
 
     def handle_rule(self):
 
@@ -160,8 +158,6 @@ class MainWindow(QMainWindow):
             rule = dialog.get_data()
             self.rule_model.insert_rule(rule)
             
-            # TESTING
-            print(f"Adding rule: {rule}")
 
     def change_default_rule(self):
         dialog = ActionWindow()
