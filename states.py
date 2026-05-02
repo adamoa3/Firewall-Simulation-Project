@@ -56,9 +56,6 @@ class StateTracker(QObject):
         row = len(self.state_keys) - 1
         self.state_added.emit(row)
 
-        # TESTING
-        print(f"Added new state: {state}")
-
     def delete_state(self, key):
         
         row = self.state_keys.index(key)

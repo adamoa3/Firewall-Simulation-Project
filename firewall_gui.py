@@ -90,8 +90,6 @@ class RuleWindow(QDialog):
         layout.addLayout(button_layout)
 
     def get_data(self):
-        # TESTING
-        print("gathering data")
 
         rule = {
             "src_ip": get_str(self.src_ip.text()),
